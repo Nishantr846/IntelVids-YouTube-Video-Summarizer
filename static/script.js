@@ -12,18 +12,23 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        console.log('Fetching summary for URL:', youtubeUrl);
         summaryBox.textContent = 'Loading summary...';
         thumbnailContainer.innerHTML = '';
         summaryBox.innerHTML = '';
 
         const videoId = extractVideoId(youtubeUrl);
         if (!videoId) {
+            console.error('Invalid YouTube URL:', youtubeUrl);
             summaryBox.textContent = 'Invalid YouTube URL.';
             return;
         }
 
+        console.log('Extracted video ID:', videoId);
+
         // Function to load YouTube iFrame Player API and fetch transcript
         loadYouTubeIframeAPI(videoId, (transcript) => {
+            console.log('Callback from loadYouTubeIframeAPI received. Transcript status:', transcript ? 'Fetched (or simulated)' : 'Failed');
             if (transcript) {
                 // Send transcript and video_id to backend
                 sendTranscriptToBackend(transcript, videoId);
@@ -49,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to load YouTube iFrame Player API and fetch transcript
     const loadYouTubeIframeAPI = (videoId, callback) => {
+        console.log('Loading YouTube iFrame Player API...');
         // Load the IFrame Player API asynchronously
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -56,11 +62,12 @@ document.addEventListener('DOMContentLoaded', function () {
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         window.onYouTubeIframeAPIReady = () => {
+            console.log('YouTube iFrame API is ready. Creating player...');
             const player = new YT.Player('player', {
                 videoId: videoId,
                 events: {
                     'onReady': (event) => {
-                        // Attempt to get captions after player is ready
+                        console.log('YouTube player ready.');
                         try {
                             const availableLanguages = event.target.getAvailableCaptionTracks();
                             if (availableLanguages && availableLanguages.length > 0) {
@@ -80,7 +87,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                 // Since direct transcript fetching via iFrame API is limited, we'll simulate success for now
                                 console.warn("Direct transcript fetching via iFrame API is limited. Simulation only.");
-                                callback("Simulated Transcript for " + videoId);
+                                const simulatedTranscript = "Simulated Transcript for " + videoId;
+                                console.log('Simulated transcript:', simulatedTranscript);
+                                callback(simulatedTranscript);
 
                             } else {
                                 console.warn("No caption tracks available for this video.");
@@ -112,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to send transcript and video_id to backend
     const sendTranscriptToBackend = (transcript, videoId) => {
+        console.log('Sending data to backend:', { transcript: transcript, video_id: videoId });
         fetch('/summarize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
