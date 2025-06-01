@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>
+        IntelVids
+    </title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&family=Zen+Dots&display=swap" rel="stylesheet">
+
+    <style>
+
+    </style>
+</head>
+
+<body class="bg-[#1e2f5a] min-h-screen flex flex-col justify-between">
+
+
+    <div class="title-container">
+        <h1 class="title-simple">IntelVids</h1>
+        <div class="tagline">Extract intelligence from YouTube video content</div>
+    </div>
+
+
+
+    <div class="input-container">
+        <div class="input-button-wrapper">
+            <input class="url-input" placeholder="Link : Paste YouTube Link Here" type="text" />
+            <button id="summarize-button" class="submit-button">Summarize</button>
+        </div>
+    </div>
+
+
+    <div id="thumbnail-container" class="thumbnail-container">
+        <!-- Thumbnail will be loaded here by JavaScript -->
+    </div>
+
+
+    <div class="summary-container">
+        <div class="summary-box">Summary :</div>
+    </div>
+
+
+    <footer class="footer-3col">
+        <a href="https://github.com/nishantr846" target="_blank" rel="noopener noreferrer" class="social-btn github">
+            <i class="fab fa-github"></i>
+            GitHub
+        </a>
+        <a href="https://nishantr846.github.io/Portfolio-Website/index.html" target="_blank" rel="noopener noreferrer"
+            class="social-btn portfolio">
+            <i class="fas fa-user"></i>
+            Portfolio
+        </a>
+        <a href="https://linkedin.com/in/nishantr846" target="_blank" rel="noopener noreferrer"
+            class="social-btn linkedin">
+            <i class="fab fa-linkedin"></i>
+            LinkedIn
+        </a>
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
