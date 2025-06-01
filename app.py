@@ -12,6 +12,9 @@ load_dotenv()
 # Get API key from environment variable
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
+    # Log an error if the API key is not set
+    print("Error: GROQ_API_KEY environment variable is not set")
+    # In a real application, you might return an error to the user or handle this differently
     raise ValueError("GROQ_API_KEY environment variable is not set")
 
 # Prompt template
@@ -21,6 +24,7 @@ def extract_video_id(url):
     """
     Extracts the YouTube video ID from various possible YouTube URL formats.
     """
+    print(f"Attempting to extract video ID from URL: {url}") # Log URL
     # Patterns for different YouTube URL formats
     patterns = [
         r'(?:v=|\/)([0-9A-Za-z_-]{11})',  # v= or / followed by 11-char ID
@@ -28,25 +32,31 @@ def extract_video_id(url):
     for pattern in patterns:
         match = re.search(pattern, url)
         if match:
-            return match.group(1)
+            video_id = match.group(1)
+            print(f"Successfully extracted video ID: {video_id}") # Log extracted ID
+            return video_id
+    print("Could not extract video ID.") # Log failure
     return None
 
 # Extract transcript from YouTube
 def extract_transcript_details(youtube_video_url):
     try:
+        print(f"Attempting to extract transcript for URL: {youtube_video_url}") # Log attempt
         video_id = extract_video_id(youtube_video_url)
         if not video_id:
             print(f"Could not extract video ID from URL: {youtube_video_url}")
             return None
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
         transcript = " ".join([i["text"] for i in transcript_list])
+        print("Successfully extracted transcript.") # Log success
         return transcript
     except Exception as e:
-        print(f"Transcript extraction error: {e}")  # For debugging
+        print(f"Transcript extraction error: {e}")  # Log error
         return None
 
 # Generate content using LLaMA 3 on Groq API
 def generate_llama_summary(transcript_text, prompt):
+    print("Attempting to generate summary with LLM.") # Log attempt
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
@@ -63,11 +73,14 @@ def generate_llama_summary(transcript_text, prompt):
     try:
         response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
         response.raise_for_status()
+        print("Successfully generated summary from LLM.") # Log success
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
+        print(f"Error generating summary: {e}") # Log error
         return f"Error generating summary: {e}"
 
 def markdown_to_html(text):
+    print("Converting markdown to HTML.") # Log attempt
     # Convert **bold** to <b> and *italic* to <i>
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
     text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
@@ -89,6 +102,7 @@ def markdown_to_html(text):
                 html_lines.append('<p>' + line.strip() + '</p>')
     if in_list:
         html_lines.append('</ul>')
+    print("Markdown conversion complete.") # Log success
     return '\n'.join(html_lines)
 
 app = Flask(__name__)
@@ -96,15 +110,18 @@ app = Flask(__name__)
 # Home route: serves the main page
 @app.route('/')
 def index():
+    print("Root route '/' accessed.") # Log access
     return render_template('index.html')
 
 # Summarize route: receives YouTube URL and returns summary
 @app.route('/summarize', methods=['POST'])
 def summarize():
+    print("Summarize route '/summarize' accessed.") # Log access
     data = request.get_json()
     youtube_url = data.get('url')
     
     if not youtube_url:
+        print("Error: No URL provided in summarize request.") # Log error
         return jsonify({'error': 'No URL provided'}), 400
     
     # Extract video ID and generate thumbnail URL
@@ -116,17 +133,20 @@ def summarize():
     # Extract transcript
     transcript = extract_transcript_details(youtube_url)
     if not transcript:
+        print("Error: Could not extract transcript.") # Log error
         return jsonify({'error': 'Could not extract transcript. Make sure the video has captions enabled.'}), 400
     
     # Generate summary using LLM
     summary = generate_llama_summary(transcript, prompt_template)
     if summary.startswith('Error'):
+        print(f"Error generating summary: {summary}") # Log error from LLM function
         return jsonify({'error': summary}), 500
     
     # Convert summary to HTML for better formatting
     summary_html = markdown_to_html(summary)
 
     # Return summary HTML and thumbnail URL
+    print("Returning summary and thumbnail.") # Log success
     return jsonify({'summary': summary_html, 'thumbnail_url': thumbnail_url}) # Include thumbnail_url
 
 if __name__ == '__main__':
