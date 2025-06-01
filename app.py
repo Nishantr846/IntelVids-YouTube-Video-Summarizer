@@ -5,6 +5,9 @@ import os
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
+import random
+import time
+from proxy_config import PROXY_LIST, PROXY_ROTATION_ENABLED, MAX_RETRIES, RETRY_DELAY
 
 # Load environment variables
 load_dotenv()
@@ -16,6 +19,12 @@ if not GROQ_API_KEY:
     print("Error: GROQ_API_KEY environment variable is not set")
     # In a real application, you might return an error to the user or handle this differently
     raise ValueError("GROQ_API_KEY environment variable is not set")
+
+def get_random_proxy():
+    """Get a random proxy from the proxy list"""
+    if not PROXY_LIST or not PROXY_ROTATION_ENABLED:
+        return None
+    return random.choice(PROXY_LIST)
 
 # Prompt template
 prompt_template = """You are a YouTube video summarizer. Summarize the following transcript into clear bullet points, within 250 words:\n\n"""
@@ -40,19 +49,52 @@ def extract_video_id(url):
 
 # Extract transcript from YouTube
 def extract_transcript_details(youtube_video_url):
-    try:
-        print(f"Attempting to extract transcript for URL: {youtube_video_url}") # Log attempt
-        video_id = extract_video_id(youtube_video_url)
-        if not video_id:
-            print(f"Could not extract video ID from URL: {youtube_video_url}")
-            return None
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        transcript = " ".join([i["text"] for i in transcript_list])
-        print("Successfully extracted transcript.") # Log success
-        return transcript
-    except Exception as e:
-        print(f"Transcript extraction error: {e}")  # Log error
+    video_id = extract_video_id(youtube_video_url)
+    if not video_id:
+        print(f"Could not extract video ID from URL: {youtube_video_url}")
         return None
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            print(f"Attempt {attempt + 1} of {MAX_RETRIES} to extract transcript")
+            
+            # Configure proxy settings
+            proxy = get_random_proxy()
+            if proxy:
+                os.environ['HTTPS_PROXY'] = proxy
+                os.environ['HTTP_PROXY'] = proxy
+                print(f"Using proxy: {proxy}")
+
+            # Try to get transcript
+            transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+            transcript = " ".join([i["text"] for i in transcript_list])
+            print("Successfully extracted transcript.")
+            return transcript
+
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            
+            # Clean up proxy settings
+            if proxy:
+                del os.environ['HTTPS_PROXY']
+                del os.environ['HTTP_PROXY']
+            
+            # If this was the last attempt, try one final time without proxy
+            if attempt == MAX_RETRIES - 1:
+                try:
+                    print("Final attempt without proxy...")
+                    transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+                    transcript = " ".join([i["text"] for i in transcript_list])
+                    print("Successfully extracted transcript without proxy.")
+                    return transcript
+                except Exception as e2:
+                    print(f"Final attempt failed: {e2}")
+                    return None
+            
+            # Wait before next attempt
+            time.sleep(RETRY_DELAY)
+    
+    return None
 
 # Generate content using LLaMA 3 on Groq API
 def generate_llama_summary(transcript_text, prompt):
