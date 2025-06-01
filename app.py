@@ -118,20 +118,19 @@ def index():
 def summarize():
     print("Summarize route '/summarize' accessed.") # Log access
     data = request.get_json()
-    youtube_url = data.get('url')
+    youtube_url = data.get('url') # We will now expect 'transcript' and 'video_id'
     
-    if not youtube_url:
-        print("Error: No URL provided in summarize request.") # Log error
-        return jsonify({'error': 'No URL provided'}), 400
-    
-    # Extract video ID and generate thumbnail URL
-    video_id = extract_video_id(youtube_url)
-    thumbnail_url = None
-    if video_id:
-        thumbnail_url = f"http://img.youtube.com/vi/{video_id}/0.jpg" # Standard thumbnail URL
+    transcript = data.get('transcript')
+    video_id = data.get('video_id')
 
-    # Extract transcript
-    transcript = extract_transcript_details(youtube_url)
+    if not transcript or not video_id:
+        print("Error: Missing transcript or video_id in summarize request.") # Log error
+        return jsonify({'error': 'Missing transcript or video ID'}), 400
+
+    # Generate thumbnail URL from the provided video_id
+    thumbnail_url = f"http://img.youtube.com/vi/{video_id}/0.jpg" # Standard thumbnail URL
+
+
     if not transcript:
         print("Error: Could not extract transcript.") # Log error
         return jsonify({'error': 'Could not extract transcript. Make sure the video has captions enabled.'}), 400
