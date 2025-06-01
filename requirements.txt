@@ -6,3 +6,4 @@ pathlib
 requests
 flask
 gunicorn
+importlib-metadata
