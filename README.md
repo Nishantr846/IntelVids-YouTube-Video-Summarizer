@@ -1,4 +1,4 @@
-# YouTube Video Summarizer
+# IntelVids - Extract intelligence from YouTube video content
 
 A Flask-based web application that summarizes YouTube videos using AI.
 
