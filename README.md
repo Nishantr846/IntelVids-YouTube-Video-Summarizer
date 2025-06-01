@@ -39,3 +39,10 @@ Create a `.env` file with the following variables:
 ## Security Note
 
 Never commit your `.env` file or expose your API keys. The `.env` file is already in `.gitignore` to prevent accidental commits. 
+
+## Contact
+
+For any questions or feedback, feel free to reach out:
+
+Author: Nishant Kumar
+GitHub: [github.com/Nishantr846](https://github.com/Nishantr846)
