@@ -2,7 +2,7 @@ youtube_transcript_api
 streamlit
 google-generativeai
 python-dotenv
-requests[socks]
+requests
 flask
 gunicorn
 importlib-metadata
