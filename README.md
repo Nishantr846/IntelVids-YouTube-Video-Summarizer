@@ -2,6 +2,8 @@
 
 A Flask-based web application that summarizes YouTube videos using AI.
 
+![App Demo](App_Demo.png)
+
 ## Setup Instructions
 
 1. Clone the repository:

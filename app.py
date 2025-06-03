@@ -3,8 +3,9 @@ import streamlit as st
 from dotenv import load_dotenv
 import os
 import requests
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, TranscriptsDisabled, CouldNotRetrieveTranscript
 import re
+import time
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +29,8 @@ def extract_video_id(url):
     # Patterns for different YouTube URL formats
     patterns = [
         r'(?:v=|\/)([0-9A-Za-z_-]{11})',  # v= or / followed by 11-char ID
+        r'(?:youtu\.be\/)([0-9A-Za-z_-]{11})',  # youtu.be/ format
+        r'(?:embed\/)([0-9A-Za-z_-]{11})',  # embed/ format
     ]
     for pattern in patterns:
         match = re.search(pattern, url)
@@ -41,18 +44,53 @@ def extract_video_id(url):
 # Extract transcript from YouTube
 def extract_transcript_details(youtube_video_url):
     try:
-        print(f"Attempting to extract transcript for URL: {youtube_video_url}") # Log attempt
+        print(f"Attempting to extract transcript for URL: {youtube_video_url}") # Log URL
         video_id = extract_video_id(youtube_video_url)
         if not video_id:
             print(f"Could not extract video ID from URL: {youtube_video_url}")
-            return None
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        transcript = " ".join([i["text"] for i in transcript_list])
-        print("Successfully extracted transcript.") # Log success
-        return transcript
+            return None, "Invalid YouTube URL. Please check the URL and try again."
+        
+        print(f"Fetching transcript for video ID: {video_id}")
+        max_retries = 3
+        retry_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+                transcript = " ".join([i["text"] for i in transcript_list])
+                print("Successfully extracted transcript.") # Log success
+                return transcript, None
+            except TranscriptsDisabled:
+                error_msg = "This video has captions disabled. Please try a different video with captions enabled."
+                print(error_msg)
+                return None, error_msg
+            except NoTranscriptFound:
+                error_msg = "No transcript found for this video. Please try a different video with captions enabled."
+                print(error_msg)
+                return None, error_msg
+            except CouldNotRetrieveTranscript as e:
+                if attempt < max_retries - 1:
+                    print(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                    continue
+                error_msg = "Could not retrieve transcript. This might be due to YouTube restrictions. Please try again later."
+                print(error_msg)
+                return None, error_msg
+            except Exception as transcript_error:
+                if "no element found" in str(transcript_error).lower():
+                    if attempt < max_retries - 1:
+                        print(f"XML parsing error, retrying in {retry_delay} seconds...")
+                        time.sleep(retry_delay)
+                        continue
+                    error_msg = "Error accessing video transcript. Please try a different video or try again later."
+                else:
+                    error_msg = f"Error fetching transcript: {str(transcript_error)}"
+                print(error_msg)
+                return None, error_msg
     except Exception as e:
-        print(f"Transcript extraction error: {e}")  # Log error
-        return None
+        error_msg = f"General error in transcript extraction: {str(e)}"
+        print(error_msg)
+        return None, error_msg
 
 # Generate content using LLaMA 3 on Groq API
 def generate_llama_summary(transcript_text, prompt):
@@ -131,10 +169,10 @@ def summarize():
         thumbnail_url = f"http://img.youtube.com/vi/{video_id}/0.jpg" # Standard thumbnail URL
 
     # Extract transcript
-    transcript = extract_transcript_details(youtube_url)
+    transcript, error = extract_transcript_details(youtube_url)
     if not transcript:
-        print("Error: Could not extract transcript.") # Log error
-        return jsonify({'error': 'Could not extract transcript. Make sure the video has captions enabled.'}), 400
+        print(f"Error: {error}") # Log error
+        return jsonify({'error': error}), 400
     
     # Generate summary using LLM
     summary = generate_llama_summary(transcript, prompt_template)
@@ -150,4 +188,4 @@ def summarize():
     return jsonify({'summary': summary_html, 'thumbnail_url': thumbnail_url}) # Include thumbnail_url
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
