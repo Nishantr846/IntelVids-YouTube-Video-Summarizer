@@ -1,0 +1,511 @@
+/*
+ * Body Styles: Sets up the background image, font, and layout for the entire app.
+ * The background uses a fixed YouTube screenshot with cover sizing.
+ * The position: relative is needed for the ::before glass overlay.
+ */
+body {
+    font-family: 'Roboto Mono', monospace;
+    /* Monospaced font for modern look */
+    background: url('youtube-bg.png') no-repeat center center fixed;
+    /* YouTube screenshot as background */
+    background-size: cover;
+    /* Ensure background covers the whole viewport */
+    min-height: 100vh;
+    /* Full viewport height */
+    display: flex;
+    /* Flex layout for vertical stacking */
+    flex-direction: column;
+    /* Stack children vertically */
+    justify-content: space-between;
+    /* Space between header/content/footer */
+    position: relative;
+    /* Needed for ::before overlay */
+}
+
+/*
+ * Glassmorphism Overlay: Applies a dark red-tinted, blurred glass effect over the entire background.
+ * This is achieved using a ::before pseudo-element so all content sits above the glass.
+ */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    /* Sits behind all content */
+    background: rgba(21, 3, 3, 0.601);
+    /* Softer red tint */
+    backdrop-filter: blur(16px);
+    /* Glassy blur */
+    -webkit-backdrop-filter: blur(16px);
+    /* Safari support */
+    pointer-events: none;
+    /* Allows clicks through overlay */
+}
+
+/* Custom scrollbar for the summary textarea */
+textarea::-webkit-scrollbar {
+    width: 16px;
+    background-color: #fff9d6;
+    border-radius: 0 0 0 0;
+}
+
+textarea::-webkit-scrollbar-thumb {
+    background: repeating-linear-gradient(45deg,
+            #e91e63,
+            #e91e63 4px,
+            #ffeb3b 4px,
+            #ffeb3b 8px);
+    border-radius: 0 0 0 0;
+}
+
+textarea::-webkit-scrollbar-button:vertical:decrement {
+    height: 20px;
+    background: #0a3a9d url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Arrow_up_font_awesome.svg/512px-Arrow_up_font_awesome.svg.png') no-repeat center center;
+    background-size: 12px 12px;
+    border-radius: 0 0 0 0;
+}
+
+textarea::-webkit-scrollbar-button:vertical:increment {
+    height: 20px;
+    background: #0a3a9d url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Arrow_down_font_awesome.svg/512px-Arrow_down_font_awesome.svg.png') no-repeat center center;
+    background-size: 12px 12px;
+    border-radius: 0 0 0 0;
+}
+
+/*
+ * Title Container: Centers the main heading at the top of the page.
+ */
+.title-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    position: relative;
+    flex-direction: column;
+    /* Stack children vertically */
+    align-items: center;
+    /* Center children horizontally in the column */
+}
+
+/*
+ * Title Styles: Large, gradient-animated text for the app title.
+ */
+.title {
+    font-family: 'Montserrat', 'Roboto Mono', monospace;
+    font-size: 40px;
+    font-weight: 800;
+    background: linear-gradient(45deg, #00b4d8, #90e0ef);
+    /* Blue gradient */
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Show gradient only */
+    text-align: center;
+    line-height: 1.1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow for depth */
+    background-size: 200% 200%;
+    animation: gradient 8s ease infinite;
+    /* Animate gradient */
+}
+
+/*
+ * Gradient animation for the title text.
+ */
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/*
+ * Input Container: Centers the input and button wrapper.
+ * Now just centers its content.
+ */
+.input-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    /* Removed align-items and gap */
+}
+
+/*
+ * Wrapper for Input and Button: Acts as the visual input bar.
+ * Handles the overall look (background, border, blur, shape).
+ */
+.input-button-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+/*
+ * Style for the wrapper when the input is focused - mimic the input focus glow.
+ */
+.input-button-wrapper:focus-within {
+    border-color: #d82000;
+    box-shadow: 0 0 15px rgba(216, 32, 0, 0.3);
+}
+
+/*
+ * URL Input: Style to fit inside the wrapper, make it borderless, and add right padding.
+ * Takes up the flexible space within the wrapper.
+ */
+.url-input {
+    background: transparent;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    padding-right: 6rem;
+    /* Add padding to the right for the button */
+    width: 100%;
+    flex-grow: 1;
+    outline: none;
+}
+
+/*
+ * Placeholder text for the input field.
+ */
+.url-input::placeholder {
+    color: rgba(215, 211, 211, 0.6);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/*
+ * Summary Container: Centers the summary box.
+ */
+.summary-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 3rem;
+}
+
+/*
+ * Summary Box: Glassy, rounded, resizable box for displaying the summary.
+ */
+.summary-box {
+    background: rgba(38, 38, 38, 0.543);
+    /* Glass effect */
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 18px;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 1000px;
+    resize: vertical;
+    min-height: 200px;
+    overflow-y: auto;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+
+/*
+ * Focus-within state for summary box: blue border and glow when active.
+ */
+.summary-box:focus-within {
+    border-color: #00b4d8;
+    box-shadow: 0 0 15px rgba(0, 180, 216, 0.3);
+}
+
+/*
+ * Custom scrollbar for the summary box: matches the blue theme.
+ */
+.summary-box::-webkit-scrollbar {
+    width: 8px;
+}
+
+.summary-box::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.summary-box::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #00b4d8, #90e0ef);
+    border-radius: 4px;
+}
+
+.summary-box::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #0096b7, #7bc8d8);
+}
+
+/*
+ * Social Footer: Centers the social buttons at the bottom of the page.
+ */
+.social-footer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    /* Space between buttons */
+    margin-bottom: 2rem;
+}
+
+/*
+ * Social Button: Glassy, rounded button with icon and label.
+ * Each button glows in its border color, with a stronger glow on hover.
+ */
+.social-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #fff;
+    background: rgba(30, 30, 30, 0.5);
+    /* Glass effect */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid transparent;
+    box-shadow: 0 0 12px 2px rgba(231, 76, 60, 0.3), 0 2px 8px 0 rgba(31, 38, 135, 0.17);
+    /* Subtle red glow */
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+}
+
+/*
+ * GitHub button: red border and glow.
+ */
+.social-btn.github {
+    border-color: #e74c3c;
+    box-shadow: 0 0 16px 2px rgba(231, 76, 60, 0.6), 0 2px 8px 0 rgba(31, 38, 135, 0.17);
+}
+
+/*
+ * LinkedIn button: blue border and glow.
+ */
+.social-btn.linkedin {
+    border-color: #0077b5;
+    box-shadow: 0 0 16px 2px rgba(0, 119, 181, 0.6), 0 2px 8px 0 rgba(31, 38, 135, 0.17);
+}
+
+/*
+ * Portfolio button: green border and glow.
+ */
+.social-btn.portfolio {
+    border-color: #27ae60;
+    box-shadow: 0 0 16px 2px rgba(39, 174, 96, 0.6), 0 2px 8px 0 rgba(31, 38, 135, 0.17);
+}
+
+/*
+ * Social button hover/focus: stronger glow in the border color.
+ */
+.social-btn:hover,
+.social-btn:focus {
+    background: rgba(30, 30, 30, 0.7);
+    outline: none;
+}
+
+.social-btn.github:hover,
+.social-btn.github:focus {
+    box-shadow: 0 0 32px 8px #e74c3c, 0 4px 16px 0 rgba(31, 38, 135, 0.27);
+}
+
+.social-btn.linkedin:hover,
+.social-btn.linkedin:focus {
+    box-shadow: 0 0 32px 8px #0077b5, 0 4px 16px 0 rgba(31, 38, 135, 0.27);
+}
+
+.social-btn.portfolio:hover,
+.social-btn.portfolio:focus {
+    box-shadow: 0 0 32px 8px #27ae60, 0 4px 16px 0 rgba(31, 38, 135, 0.27);
+}
+
+/*
+ * Social button icon: ensures consistent sizing for icons/images.
+ */
+.social-btn i,
+.social-btn img {
+    font-size: 1.2em;
+    width: 1.2em;
+    height: 1.2em;
+}
+
+/* Three-column footer layout */
+.footer-3col {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-3col .social-btn {
+    justify-content: center;
+    /* Button width fits content */
+    flex: unset;
+    max-width: unset;
+    min-width: 0;
+    width: auto;
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
+}
+
+.footer-3col .social-btn.portfolio {
+    justify-content: center;
+}
+
+.footer-3col .social-btn.github {
+    justify-content: flex-start;
+}
+
+.footer-3col .social-btn.linkedin {
+    justify-content: flex-end;
+}
+
+/* Remove previous portfolio-footer and side-btn styles if present */
+.portfolio-footer,
+.side-btn {
+    display: none !important;
+}
+
+/*
+ * YouTube-style Title: Mimics the YouTube logo for the app title.
+ */
+.title-youtube {
+    font-family: 'Roboto', 'Montserrat', 'Roboto Mono', monospace;
+    font-size: 40px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+}
+
+.yt-you {
+    color: #222;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.yt-tube {
+    display: inline-block;
+    background: #ff0000;
+    color: #fff;
+    border-radius: 0.4em;
+    padding: 0 0.3em;
+    margin-left: 2px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.12);
+}
+
+/*
+ * Simple, aesthetic title style for YouTube Video Summarizer
+ */
+.title-simple {
+    font-family: "Zen Dots", sans-serif;
+    font-size: 60px;
+    font-weight: 400;
+    font-style: normal;
+    text-align: center;
+    /* Keep text centered within its own box */
+    background: linear-gradient(90deg, #ff5252 0%, #ff9800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+    margin-bottom: 0.2em;
+    /* Reduce margin bottom slightly as tagline adds space */
+}
+
+.tagline {
+    font-family: "Nova Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
+    color: #FFFFFF;
+    font-size: 25px;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.thumbnail-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.video-thumbnail {
+    max-width: 100%;
+    /* Ensure thumbnail doesn't overflow its container */
+    height: auto;
+    border-radius: 1.5rem;
+    /* Match the summary box border-radius */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    /* Add a subtle shadow */
+}
+
+/*
+ * Minimal Submit Button: Styled to be inside the input bar.
+ */
+.submit-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.submit-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.submit-button:focus {
+    outline: none;
+    /* Focus style is handled by the wrapper's focus-within */
+}
